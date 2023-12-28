@@ -1,0 +1,42 @@
+ # Compiled Go binary
+ *.exe
+ *.exe~
+ *.dll
+ *.so
+ *.dylib
+
+ # Go executables and packages
+ *.out
+ /_test/
+
+ # Output of the go coverage tool
+ *.cover
+
+ # Cache and Temporary files
+ *.log
+ *.cache
+ *.bak
+ *.tmp
+
+ # Local configuration files
+ .vscode/
+ .idea/
+
+ # Dependency directories
+ /vendor/
+ /go.sum
+ /go.mod
+
+ # Output files of go generate
+ *_gen.go
+
+ # Environment variables file
+ .env
+
+ # Mac OS and Linux system files
+ .DS_Store
+ Thumbs.db
+
+ # Editor-specific files
+ *.swp
+ *~
