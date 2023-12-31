@@ -47,14 +47,12 @@ func (s *TinyURL) Setup() error {
 		return fmt.Errorf("unable to read config: %s", err)
 	}
 
+	// Initialize the ShortLinkGenerator based on config provided
 	if s.config.LinkGenerator.GeneratorType == "SHA256" {
 		s.ShortLinkGenerator = &linkGenerator.SHA256Generator{ShortLinkSize: s.config.LinkGenerator.ShortLinkSize, BaseSize: s.config.LinkGenerator.Base}
 	} else {
 		s.ShortLinkGenerator = &linkGenerator.SeqGenerator{BaseSize: s.config.LinkGenerator.Base, Counter: s.config.LinkGenerator.StartingNumber}
 	}
-
-	// Initialize the ShortLinkGenerator with Sequential Generator and starting value of counter 10000000
-	s.ShortLinkGenerator = &linkGenerator.SeqGenerator{BaseSize: 64, Counter: 10000000}
 
 	// Initialize the database connector (using a PostgreSQL connector).
 	s.URLStore = databaseConnector.NewPSQLConnector(s.config.Database)

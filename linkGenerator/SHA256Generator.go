@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"math/rand"
 	"tinyURL/databaseConnector"
 )
 
@@ -26,11 +25,6 @@ func (g *SHA256Generator) generateRandomLink(input string) string {
 	return hashBase64[:g.ShortLinkSize]
 }
 
-// generateRandomInt generates a random integer in the specified range.
-func generateRandomInt(min, max int) int {
-	return rand.Intn(max-min+1) + min
-}
-
 // GenerateLink creates or updates a short link in the specified database,
 // handling collisions by updating a random character in the short link.
 func (g *SHA256Generator) GenerateLink(link string, db databaseConnector.DatabaseConnector) (string, error) {
@@ -42,12 +36,11 @@ func (g *SHA256Generator) GenerateLink(link string, db databaseConnector.Databas
 		if err != nil {
 			log.Default().Printf("Collision Detected: Error inserting %v: %v for %v", shortLink, err, link)
 			// Collision detected, update a random character in the short link
-			charArray := []byte("-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz")
-			positionToUpdate := generateRandomInt(0, g.ShortLinkSize-1)
-			characterToUse := generateRandomInt(0, g.BaseSize-1)
+			positionToUpdate := GenerateRandomInt(0, g.ShortLinkSize-1)
+			characterToUse := GenerateRandomInt(0, g.BaseSize-1)
 
 			// Update the character in the short link
-			shortLink = shortLink[:positionToUpdate] + string(charArray[characterToUse]) + shortLink[positionToUpdate+1:]
+			shortLink = shortLink[:positionToUpdate] + string(CharArray[characterToUse]) + shortLink[positionToUpdate+1:]
 		} else {
 			log.Default().Printf("Successfully inserted %v for %v", shortLink, link)
 			return shortLink, nil

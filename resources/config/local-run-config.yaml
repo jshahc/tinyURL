@@ -15,4 +15,5 @@ database:
 linkGenerator:
   generatorType: "sequential"
   base: 64
-  startingNumber: 10000000
+  # startingNumber: 10000000, not used once partitionSize is provided
+  partitionSize: 10
