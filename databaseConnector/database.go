@@ -1,4 +1,4 @@
-package databaseConnectors
+package databaseConnector
 
 // DatabaseConnector is an interface for interacting with a generic database.
 type DatabaseConnector interface {
@@ -19,6 +19,6 @@ type DatabaseConnector interface {
 }
 
 // NewPSQLConnector returns a new instance of a PostgreSQL database connector.
-func NewPSQLConnector() DatabaseConnector {
-	return &psqlConnector{}
+func NewPSQLConnector(config Config) DatabaseConnector {
+	return &psqlConnector{config: config}
 }

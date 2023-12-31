@@ -1,4 +1,4 @@
-package databaseConnectors
+package databaseConnector
 
 import (
 	"fmt"
@@ -7,15 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/patrickmn/go-cache"
-)
-
-const (
-	host                = "localhost"
-	port                = 5432
-	user                = "postgres"
-	password            = "mysecretpassword"
-	dbname              = "postgres"
-	cacheExpirationTime = 30 * time.Minute
 )
 
 // ShortLinkSchema represents the short_links table structure.
@@ -28,22 +19,40 @@ type ShortLinkSchema struct {
 type psqlConnector struct {
 	Database *sqlx.DB    // Database connection
 	Cache    cache.Cache // In-memory cache, Both for ShortLink -> OriginalLink and OriginalLink -> ShortLink
+	config   Config      // Database configuration
+}
+
+// Config represents the configuration of a PostgreSQL database.
+type Config struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	DBName   string
+	Cache    CacheConfig
+}
+
+type CacheConfig struct {
+	Enable         bool
+	ExpirationTime time.Duration
 }
 
 // Init initializes the PostgreSQL database connection.
 func (psql *psqlConnector) Init() error {
-	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		psql.config.Host, psql.config.Port, psql.config.Username, psql.config.Password, psql.config.DBName)
 
 	// Open a PostgreSQL database connection using sqlx.
-	db, err := sqlx.Open("postgres", connStr)
+	db, err := sqlx.Open("postgres", connectionString)
 	if err != nil {
 		return err
 	}
 	psql.Database = db
 
 	// Initialize a cache for storing short links.
-	psql.Cache = *cache.New(cacheExpirationTime, cacheExpirationTime)
+	if psql.config.Cache.Enable {
+		psql.Cache = *cache.New(psql.config.Cache.ExpirationTime, psql.config.Cache.ExpirationTime)
+	}
 
 	return nil
 }
@@ -52,8 +61,11 @@ func (psql *psqlConnector) Init() error {
 func (psql *psqlConnector) GetLink(shortLink string) (string, error) {
 
 	// Check if short link is in cache
-	if data, found := psql.Cache.Get(shortLink); found {
-		return data.(string), nil
+	cacheEnabled := psql.config.Cache.Enable
+	if cacheEnabled {
+		if data, found := psql.Cache.Get(shortLink); found {
+			return data.(string), nil
+		}
 	}
 
 	// Execute query on database
@@ -65,7 +77,9 @@ func (psql *psqlConnector) GetLink(shortLink string) (string, error) {
 	}
 
 	// Set Value in cache
-	psql.Cache.Set(shortLink, data.OriginalLink, cacheExpirationTime)
+	if cacheEnabled {
+		psql.Cache.Set(shortLink, data.OriginalLink, psql.config.Cache.ExpirationTime)
+	}
 
 	return data.OriginalLink, nil
 }
@@ -73,9 +87,12 @@ func (psql *psqlConnector) GetLink(shortLink string) (string, error) {
 // GetShortLink retrieves the short link associated with the given link from the database.
 func (psql *psqlConnector) GetShortLink(link string) (string, error) {
 
-	// Check if short link is in cache
-	if data, found := psql.Cache.Get(link); found {
-		return data.(string), nil
+	// Check if original link is in cache
+	cacheEnabled := psql.config.Cache.Enable
+	if cacheEnabled {
+		if data, found := psql.Cache.Get(link); found {
+			return data.(string), nil
+		}
 	}
 
 	// Execute query on database
@@ -87,7 +104,9 @@ func (psql *psqlConnector) GetShortLink(link string) (string, error) {
 	}
 
 	// Set Value in cache
-	psql.Cache.Set(link, data.ShortLink, cacheExpirationTime)
+	if cacheEnabled {
+		psql.Cache.Set(link, data.ShortLink, psql.config.Cache.ExpirationTime)
+	}
 
 	return data.ShortLink, nil
 }
