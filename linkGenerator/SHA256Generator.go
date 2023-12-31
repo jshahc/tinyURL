@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"tinyURL/databaseConnectors"
+	"tinyURL/databaseConnector"
 )
 
 var (
@@ -33,7 +33,7 @@ func generateRandomInt(min, max int) int {
 
 // GenerateLink creates or updates a short link in the specified database,
 // handling collisions by updating a random character in the short link.
-func (g *SHA256Generator) GenerateLink(link string, db databaseConnectors.DatabaseConnector) (string, error) {
+func (g *SHA256Generator) GenerateLink(link string, db databaseConnector.DatabaseConnector) (string, error) {
 	shortLink := g.generateRandomLink(link)
 	log.Default().Printf("Inserting %v for %v", shortLink, link)
 	i := 0

@@ -2,7 +2,7 @@ package linkGenerator
 
 import (
 	"sync"
-	"tinyURL/databaseConnectors"
+	"tinyURL/databaseConnector"
 )
 
 // Elements of chosen base 64
@@ -16,7 +16,7 @@ type SeqGenerator struct {
 }
 
 // GenerateLink creates a new short link for the given link and updates the database
-func (g *SeqGenerator) GenerateLink(link string, db databaseConnectors.DatabaseConnector) (string, error) {
+func (g *SeqGenerator) GenerateLink(link string, db databaseConnector.DatabaseConnector) (string, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
