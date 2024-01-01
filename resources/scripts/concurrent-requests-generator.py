@@ -17,9 +17,9 @@ def make_post_request():
 
 def main():
     # Using ThreadPoolExecutor to make parallel POST requests
-    with ThreadPoolExecutor(max_workers=100) as executor:
+    with ThreadPoolExecutor(max_workers=50) as executor:
         # Submitting tasks for each URL
-        futures = [executor.submit(make_post_request) for i in range(133300)]
+        futures = [executor.submit(make_post_request) for i in range(5000)]
 
         # Collecting results as they become available
         for future in as_completed(futures):
