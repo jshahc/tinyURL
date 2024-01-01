@@ -15,6 +15,11 @@ type ShortLinkSchema struct {
 	OriginalLink string `db:"original_link"`
 }
 
+// CounterSchema represents the counter_table table structure.
+type CounterSchema struct {
+	CounterValue int64 `db:"counter_value"`
+}
+
 // psqlConnector is a PostgreSQL database connector implementing the DatabaseConnector interface.
 type psqlConnector struct {
 	Database *sqlx.DB    // Database connection
@@ -116,6 +121,16 @@ func (psql *psqlConnector) InsertLink(shortLink string, link string) error {
 	query := "INSERT INTO short_links (short_link, original_link) VALUES ($1, $2)"
 	_, err := psql.Database.Exec(query, shortLink, link)
 	return err
+}
+
+func (psql *psqlConnector) GetNextSeqNumber() (int64, error) {
+	var data CounterSchema
+	query := "UPDATE counter_table SET counter_value = counter_value + 1 RETURNING counter_value;"
+	err := psql.Database.Get(&data, query)
+	if err != nil {
+		return 0, err
+	}
+	return data.CounterValue, nil
 }
 
 // Close closes the PostgreSQL database connection.

@@ -23,8 +23,12 @@ read_and_export_config() {
     PG_PASSWORD=$(yq eval '.database.password' "$config_file")
     PG_DB=$(yq eval '.database.dbname' "$config_file")
 
+    # Server Configs
+    STARTING_NUMBER=$(yq eval '.linkGenerator.startingNumber' "$config_file")
+    GENERATOR_TYPE=$(yq eval '.linkGenerator.generatorType' "$config_file")
+
     # Export the variables
-    export PG_HOST PG_PORT PG_USER PG_PASSWORD PG_DB
+    export PG_HOST PG_PORT PG_USER PG_PASSWORD PG_DB STARTING_NUMBER GENERATOR_TYPE
 }
 
 # Function to create the PostgreSQL container
@@ -66,12 +70,28 @@ create_tables() {
 
     # Execute SQL command using psql
     $psql_command -c "$sql_command"
+    
+    if [ "$GENERATOR_TYPE" = "sequential" ]; then
+        local sql_command="
+          DROP TABLE IF EXISTS counter_table;
+          CREATE TABLE counter_table (
+              counter_value BIGINT PRIMARY KEY
+          );
+
+          -- Insert  starting value into the table
+          INSERT INTO counter_table (counter_value) VALUES ($STARTING_NUMBER);
+        "
+
+        echo "Creating the 'counter_table' table in the database"
+        # Execute SQL command using psql
+        $psql_command -c "$sql_command"
+    fi
 }
 
-echo "Setting up PostgreSQL database using Docker and creating table for short links"
+echo "Setting up PostgreSQL database using Docker and creating tables"
 
 # Set the default configuration file
-CONFIG_FILE="local-run-config.yaml"
+CONFIG_FILE="resources/config/local-run-config.yaml"
 
 # Check if a configuration file parameter is provided
 if [ "$#" -eq 1 ]; then

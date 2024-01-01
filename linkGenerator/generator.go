@@ -18,9 +18,8 @@ type LinkGenerator interface {
 type Config struct {
 	GeneratorType  string
 	Base           int
-	StartingNumber int
+	StartingNumber int64
 	ShortLinkSize  int
-	PartitionSize  int
 }
 
 // GenerateRandomInt generates a random integer in the specified range.

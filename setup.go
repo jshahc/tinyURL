@@ -48,10 +48,11 @@ func (s *TinyURL) Setup() error {
 	}
 
 	// Initialize the ShortLinkGenerator based on config provided
-	if s.config.LinkGenerator.GeneratorType == "SHA256" {
-		s.ShortLinkGenerator = &linkGenerator.SHA256Generator{ShortLinkSize: s.config.LinkGenerator.ShortLinkSize, BaseSize: s.config.LinkGenerator.Base}
+	linkGeneratorConfig := s.config.LinkGenerator
+	if linkGeneratorConfig.GeneratorType == "SHA256" {
+		s.ShortLinkGenerator = &linkGenerator.SHA256Generator{ShortLinkSize: linkGeneratorConfig.ShortLinkSize, BaseSize: linkGeneratorConfig.Base}
 	} else {
-		s.ShortLinkGenerator = &linkGenerator.SeqGenerator{BaseSize: s.config.LinkGenerator.Base, Counter: s.config.LinkGenerator.StartingNumber}
+		s.ShortLinkGenerator = &linkGenerator.SeqGenerator{BaseSize: linkGeneratorConfig.Base, Counter: linkGeneratorConfig.StartingNumber}
 	}
 
 	// Initialize the database connector (using a PostgreSQL connector).

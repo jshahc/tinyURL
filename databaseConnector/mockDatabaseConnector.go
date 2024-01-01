@@ -1,7 +1,8 @@
 package databaseConnector
 
 type MockDatabaseConnector struct {
-	Data map[string]string
+	Data    map[string]string
+	Counter int64
 }
 
 func (m *MockDatabaseConnector) Init() error {
@@ -32,4 +33,9 @@ func (m *MockDatabaseConnector) GetShortLink(link string) (string, error) {
 func (m *MockDatabaseConnector) InsertLink(shortLink, link string) error {
 	m.Data[link] = shortLink
 	return nil
+}
+
+func (m *MockDatabaseConnector) GetNextSeqNumber() (int64, error) {
+	m.Counter += 1
+	return m.Counter, nil
 }

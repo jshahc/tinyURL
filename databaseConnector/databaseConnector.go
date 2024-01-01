@@ -16,6 +16,9 @@ type DatabaseConnector interface {
 
 	// InsertLink inserts a new short link and its associated original link into the database.
 	InsertLink(shortLink string, link string) error
+
+	// GetNextSeqNumber retrieves the next sequence number from the database.
+	GetNextSeqNumber() (int64, error)
 }
 
 // NewPSQLConnector returns a new instance of a PostgreSQL database connector.
