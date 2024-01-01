@@ -5,22 +5,11 @@ import (
 	"tinyURL/databaseConnector"
 )
 
-// Maximum number of links supported, used for partitioning
-var limit = 100_000_000
-
 // SeqGenerator is a LinkGenerator implementation using sequential numbers and base64 encoding
 type SeqGenerator struct {
-	BaseSize           int        // Base size for base64 conversion
-	lock               sync.Mutex // Mutex for thread safety
-	Counter            int        // Counter for generating unique sequence numbers, used only when counter is not partitioned
-	PartitionedCounter []int      // Partitioned counter for generating unique sequence numbers
-}
-
-func (g *SeqGenerator) Init(numPartitions int) {
-	g.PartitionedCounter = make([]int, numPartitions)
-	for i := 0; i < numPartitions; i++ {
-		g.PartitionedCounter[i] = (i * limit) / numPartitions
-	}
+	BaseSize int        // Base size for base64 conversion
+	lock     sync.Mutex // Mutex for thread safety
+	Counter  int        // Counter for generating unique sequence numbers, used only when counter is not partitioned
 }
 
 // GenerateLink creates a new short link for the given link and updates the database
@@ -60,14 +49,6 @@ func (g *SeqGenerator) intToBase64(number int) string {
 
 // getSeqNumber increments and returns the current sequence number
 func (g *SeqGenerator) getSeqNumber() int {
-	// Partitioning is not enabled
-	if len(g.PartitionedCounter) == 0 {
-		g.Counter += 1
-		return g.Counter
-	}
-
-	// Partitioning is enabled, pick a random partition and increment value
-	randomPartition := GenerateRandomInt(0, len(g.PartitionedCounter)-1)
-	g.PartitionedCounter[randomPartition] += 1
-	return g.PartitionedCounter[randomPartition]
+	g.Counter += 1
+	return g.Counter
 }

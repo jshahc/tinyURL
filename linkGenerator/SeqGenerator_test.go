@@ -30,28 +30,6 @@ func TestSeqGenerator_GenerateLink(t *testing.T) {
 	}
 }
 
-func TestSeqGenerator_GenerateLinkPartitioned(t *testing.T) {
-	mockDB := &databaseConnector.MockDatabaseConnector{Data: make(map[string]string)}
-	gen := &SeqGenerator{BaseSize: 64}
-	gen.Init(10)
-
-	// Test new link generation
-	link := "https://example.com"
-	shortLink, err := gen.GenerateLink(link, mockDB)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-
-	// Test existing link retrieval
-	existingShortLink, err := gen.GenerateLink(link, mockDB)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	if existingShortLink != shortLink {
-		t.Errorf("Expected %s, got %s", shortLink, existingShortLink)
-	}
-}
-
 func TestSeqGenerator_intToBase64(t *testing.T) {
 	gen := &SeqGenerator{BaseSize: 64}
 	examples := map[int]string{
