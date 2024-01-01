@@ -1,7 +1,7 @@
-## tinyURL
+# tinyURL
 
-A link shortener service that uses a sequential hashing algorithm to generate a unique short url for a given url and
-stores in postgresql database with a in-memory cache.
+A link shortener service that uses a sequential hashing algorithm to generate a unique short url and uses a postgresql
+database with an in-memory cache.
 
 ## Startup
 
@@ -63,7 +63,7 @@ We have 2 ways to go about this:
 
 |                       | Pros                                        | Cons                                                                                      |
 |-----------------------|---------------------------------------------|-------------------------------------------------------------------------------------------|
-| SHA-256 Generator     | No security concerns about being predictive | Handling collisions can be tricky *                                                       |
+| SHA-256 Generator     | No security concerns about being predictive | Handling collisions can be tricky                                                         |
 | Sequential  Generator | No collision handling is required.          | Sequential hashing is predictable and can be used to enumerate all the urls in the system |
 
 ## Link Store
@@ -81,18 +81,20 @@ This will help us in reducing the number of reads from the database.
 
 PSQL Table Structure:
 
-```bash
- CREATE TABLE short_links (
-     short_link VARCHAR (10) PRIMARY KEY,
-     original_link VARCHAR (5000) NOT NULL
+```sql
+ CREATE TABLE short_links
+ (
+     short_link    VARCHAR(10) PRIMARY KEY,
+     original_link VARCHAR(5000) NOT NULL
  );
- CREATE INDEX original_link_index ON short_links (original_link);
+CREATE INDEX original_link_index ON short_links (original_link);
 ```
 
 For Sequential Hashing Generator, we can use a counter_table to store the counter value. This can be done using:
 
-```bash
- CREATE TABLE counter_table (
+```sql
+ CREATE TABLE counter_table
+ (
      counter_value BIGINT PRIMARY KEY
  );
 ```
